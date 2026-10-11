@@ -104,11 +104,16 @@ The website credits [js.org](https://js.org) for its free website hosting. A `js
 - Website author: [olympus_mons26](https://github.com/olympus-mons26)
 - Website hosting: [js.org](https://js.org)
 
+## License
+
+Wick's original source code and documentation are licensed under the [MIT License](LICENSE). This license does not cover third-party assets. In particular, `docs/icons8-markdown-96.png` and the derived `favicon.ico` are excluded from the MIT grant and remain subject to their original source's terms. Their exact source and license are not verified in this repository; the files are included in the bundle as-is, but this project grants no additional rights to reuse them. Verify the asset provider's terms and attribution requirements before reuse or redistribution.
+
 ## Repository layout
 
 ```text
 .
 ├── .gitignore
+├── LICENSE
 ├── .github/
 │   └── workflows/pages.yml    # Publishes the static site and editor to GitHub Pages
 ├── docs/                  # Project landing page and static assets
