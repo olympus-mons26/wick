@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Wick</title>
+    <meta
+      name="description"
+      content="Wick is a portable Markdown editor that auto-saves notes to a folder you choose."
+    />
+    <link rel="icon" type="image/x-icon" href="../favicon.ico" />
+    <link rel="stylesheet" href="css/app.css" />
+  </head>
+  <body>
+    <div class="splash" id="splash" aria-hidden="true">
+      <svg class="splash-flame" viewBox="0 0 64 64" aria-hidden="true">
+        <path class="flame-outer" d="M32 6c9 11 18 18 18 30a18 18 0 1 1-36 0C14 24 23 17 32 6z" />
+        <path class="flame-inner" d="M32 22c4.5 5.5 8 9 8 14a8 8 0 1 1-16 0c0-5 3.5-8.5 8-14z" />
+      </svg>
+      <p class="splash-name">Wick</p>
+      <p class="splash-tag">Markdown that travels with you</p>
+    </div>
+
+    <div class="app" id="app">
+      <header class="topbar">
+        <div class="brand">
+          <svg class="logo" viewBox="0 0 32 32" aria-hidden="true">
+            <path class="flame-outer" d="M16 4c5 6 10 10 10 16a10 10 0 1 1-20 0C6 14 11 10 16 4z" />
+            <path class="flame-inner" d="M16 12c2.4 3 4 5 4 7.4A4 4 0 1 1 12 19.4C12 17 13.6 15 16 12z" />
+          </svg>
+          <div class="brand-copy">
+            <strong>Wick</strong>
+            <span id="drive-path" class="drive-path">Choose your /notes folder once to enable portable auto-save</span>
+          </div>
+        </div>
+
+        <div class="top-actions">
+          <button type="button" class="ghost" id="new-btn" title="New note">New</button>
+          <button type="button" class="ghost" id="import-btn" title="Import Markdown notes or a Wick backup">Import</button>
+          <button type="button" class="ghost" id="export-btn" title="Download the current note">Export</button>
+          <button type="button" class="ghost" id="backup-btn" title="Download all notes as a backup">Backup</button>
+          <button type="button" class="ghost" id="rename-btn" title="Rename note">Rename</button>
+          <button type="button" class="ghost danger" id="delete-btn" title="Delete note">Delete</button>
+          <input id="import-input" type="file" accept=".md,.markdown,.txt,.json,application/json,text/markdown,text/plain" multiple hidden />
+          <button
+            type="button"
+            class="theme-btn"
+            id="theme-btn"
+            title="Switch theme"
+            aria-label="Switch between dark and light mode"
+          >
+            <span class="sun" aria-hidden="true"></span>
+            <span class="moon" aria-hidden="true"></span>
+          </button>
+        </div>
+      </header>
+
+      <div class="ribbon" role="toolbar" aria-label="Markdown formatting">
+        <div class="ribbon-group">
+          <span class="ribbon-label">Font</span>
+          <div class="ribbon-btns">
+            <button type="button" class="fmt" data-cmd="bold" title="Bold (Ctrl/Cmd+B)" aria-label="Bold"><strong>B</strong></button>
+            <button type="button" class="fmt" data-cmd="italic" title="Italic (Ctrl/Cmd+I)" aria-label="Italic"><em>I</em></button>
+            <button type="button" class="fmt" data-cmd="underline" title="Underline (Ctrl/Cmd+U)" aria-label="Underline"><span class="u">U</span></button>
+            <button type="button" class="fmt" data-cmd="strike" title="Strikethrough" aria-label="Strikethrough"><s>S</s></button>
+          </div>
+        </div>
+        <div class="ribbon-group">
+          <span class="ribbon-label">Styles</span>
+          <div class="ribbon-btns">
+            <button type="button" class="fmt" data-cmd="h1" title="Heading 1" aria-label="Heading 1">H1</button>
+            <button type="button" class="fmt" data-cmd="h2" title="Heading 2" aria-label="Heading 2">H2</button>
+            <button type="button" class="fmt" data-cmd="h3" title="Sub-heading" aria-label="Sub-heading">H3</button>
+          </div>
+        </div>
+        <div class="ribbon-group">
+          <span class="ribbon-label">Paragraph</span>
+          <div class="ribbon-btns">
+            <button type="button" class="fmt" data-cmd="ul" title="Bulleted list" aria-label="Bulleted list">• List</button>
+            <button type="button" class="fmt" data-cmd="ol" title="Numbered list" aria-label="Numbered list">1. List</button>
+            <button type="button" class="fmt" data-cmd="task" title="Checklist" aria-label="Checklist">☑</button>
+            <button type="button" class="fmt" data-cmd="quote" title="Quote" aria-label="Quote">“ ”</button>
+          </div>
+        </div>
+        <div class="ribbon-group">
+          <span class="ribbon-label">Insert</span>
+          <div class="ribbon-btns">
+            <button type="button" class="fmt" data-cmd="code" title="Inline code" aria-label="Inline code">&lt;/&gt;</button>
+            <button type="button" class="fmt" data-cmd="codeblock" title="Code block" aria-label="Code block">{ }</button>
+            <button type="button" class="fmt" data-cmd="hr" title="Line separator" aria-label="Line separator">―</button>
+            <button type="button" class="fmt" data-cmd="link" title="Link (Ctrl/Cmd+K)" aria-label="Link">Link</button>
+            <button type="button" class="fmt" data-cmd="image" title="Image" aria-label="Image">Image</button>
+            <button type="button" class="fmt" data-cmd="table" title="Table" aria-label="Table">Table</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="shell">
+        <aside class="files" id="notes-panel" aria-label="Notes">
+          <div class="files-head">
+            <span>Notes</span>
+            <button type="button" class="folder-btn" id="connect-folder-btn" title="Choose the /notes folder on your external drive. Wick will auto-save there after permission is granted.">Choose /notes folder</button>
+          </div>
+          <ul class="file-list" id="file-list"></ul>
+        </aside>
+
+        <div class="workspace" id="workspace">
+          <section class="pane editor-pane" aria-label="Markdown editor">
+            <div class="pane-head">
+              <div class="editor-heading">
+                <span>Editor</span>
+                <button type="button" class="pane-toggle" id="notes-toggle" aria-controls="notes-panel" aria-expanded="true">Hide Notes</button>
+              </div>
+              <span class="filename" id="filename">untitled.md</span>
+            </div>
+            <div class="editor-scroll">
+              <textarea
+                id="editor"
+                spellcheck="true"
+                autocapitalize="off"
+                autocomplete="off"
+                autocorrect="off"
+                wrap="off"
+                aria-label="Markdown source"
+              ></textarea>
+            </div>
+          </section>
+
+          <section class="pane preview-pane" aria-label="Live preview">
+            <div class="pane-head">
+              <span>Preview</span>
+              <span class="live-dot" title="Updates as you type">live</span>
+            </div>
+            <div class="preview-scroll">
+              <article class="preview" id="preview"></article>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <footer class="status">
+        <p id="status" aria-live="polite">Ready</p>
+        <p id="counts"></p>
+        <a class="site-link" href="../docs/index.html">Wick website <span aria-hidden="true">↗</span></a>
+      </footer>
+    </div>
+
+    <script type="text/plain" id="default-markdown-guide">
+# Markdown Guide
+
+Write plain text with Markdown marks to add structure and formatting. Wick renders the result in the live preview.
+
+## Headings
+
+Start a line with one to six `#` characters. More characters make a smaller heading.
+
+```md
+# Heading 1
+## Heading 2
+### Heading 3
+#### Heading 4
+##### Heading 5
+###### Heading 6
+```
+
+## Paragraphs and line breaks
+
+Write a paragraph as one or more consecutive lines. Leave a blank line to start a new paragraph.
+
+```md
+This is the first paragraph.
+It can continue on another line.
+
+This is a second paragraph.
+```
+
+## Emphasis
+
+```md
+*italic*
+**bold**
+***bold and italic***
+~~strikethrough~~
+==highlight==
+`inline code`
+<u>underline</u>
+```
+
+## Lists
+
+Use `-`, `*`, or `+` for bullets. Start ordered items with a number and a period.
+
+```md
+- First bullet
+- Second bullet
+
+1. First step
+2. Second step
+```
+
+For task lists, use `[ ]` for an unchecked item and `[x]` for a checked item.
+
+```md
+- [ ] To do
+- [x] Done
+```
+
+## Block quotes
+
+Start a line with `>` to make a quote.
+
+```md
+> This is a quoted passage.
+> A quote can continue on another line.
+```
+
+## Links and images
+
+Put the link text in square brackets and the address in parentheses.
+
+```md
+[Visit example.com](https://example.com)
+![Description of image](picture.png)
+```
+
+## Code blocks
+
+Start a line with three backtick characters, optionally followed by a language label such as `js`. Put another line of three backtick characters after the code to close the block.
+
+## Horizontal rules
+
+Put three or more hyphens, asterisks, or underscores on a line by themselves.
+
+```md
+---
+```
+
+## Tables
+
+Separate cells with `|`. The row of hyphens separates the headings from the table contents.
+
+```md
+| Syntax | Meaning |
+| --- | --- |
+| `#` | Heading |
+| `**text**` | Bold text |
+```
+    </script>
+    <script src="js/markdown.js"></script>
+    <script src="js/app.js"></script>
+  </body>
+</html>
