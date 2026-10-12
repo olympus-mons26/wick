@@ -179,6 +179,58 @@ html[data-theme="light"] .flame-inner {
   letter-spacing: 0.04em;
 }
 
+.browser-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin: 0 1rem 0.7rem;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid color-mix(in srgb, var(--danger) 50%, var(--line));
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--danger) 10%, var(--panel));
+  color: var(--ink);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.browser-alert[hidden] {
+  display: none;
+}
+
+.browser-alert p {
+  flex: 1;
+  margin: 0;
+}
+
+.browser-alert code {
+  font-family: var(--font-mono);
+  color: var(--accent);
+}
+
+.browser-alert button {
+  flex: 0 0 auto;
+  width: 1.6rem;
+  height: 1.6rem;
+  border: 1px solid transparent;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 1.15rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.browser-alert button:hover {
+  border-color: var(--line);
+  color: var(--ink);
+}
+
+.browser-alert button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 .drive-path {
   color: var(--muted);
   font-size: 0.7rem;
@@ -846,6 +898,12 @@ html[data-theme="light"] .moon {
 }
 
 @media (max-width: 540px) {
+  .browser-alert {
+    margin-inline: 0.7rem;
+    padding: 0.6rem 0.7rem;
+    font-size: 0.76rem;
+  }
+
   .topbar {
     gap: 0.55rem;
     padding: 0.55rem 0.7rem;

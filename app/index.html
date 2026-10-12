@@ -55,6 +55,11 @@
         </div>
       </header>
 
+      <aside class="browser-alert" id="browser-alert" role="alert" hidden>
+        <p><strong>This browser isn't Chromium-based or doesn't support folder access.</strong> Wick can't auto-save directly to <code>/notes</code> here. Use Import/Export, or open Wick in a supported Chromium-based browser.</p>
+        <button type="button" id="dismiss-browser-alert" aria-label="Dismiss browser compatibility notice" title="Dismiss">×</button>
+      </aside>
+
       <div class="ribbon" role="toolbar" aria-label="Markdown formatting">
         <div class="ribbon-group">
           <span class="ribbon-label">Font</span>
@@ -142,6 +147,7 @@
         <p id="status" aria-live="polite">Ready</p>
         <p id="counts"></p>
         <a class="site-link" href="../docs/index.html">Wick website <span aria-hidden="true">↗</span></a>
+        <a class="site-link" href="https://icons8.com" target="_blank" rel="noopener noreferrer">Favicon by Icons8 <span aria-hidden="true">↗</span></a>
       </footer>
     </div>
 

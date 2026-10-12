@@ -1,4 +1,25 @@
+# Operating System files
 .DS_Store
 Thumbs.db
-*.log
+desktop.ini
 ._*
+
+# Code editor configurations
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+
+# Local log files
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Node / Dependency folders (if you ever run local tools like npm run sort)
+node_modules/
+dist/
+build/

@@ -30,7 +30,6 @@ jobs:
           mkdir -p _site
           cp -R docs app notes _site/
           cp favicon.ico _site/favicon.ico
-          cp LICENSE _site/LICENSE
           cp Wick.zip _site/Wick.zip
           printf '%s\n' '<!doctype html><meta charset="utf-8"><meta http-equiv="refresh" content="0;url=docs/index.html"><title>Wick</title><a href="docs/index.html">Open the Wick website</a>' > _site/index.html
       - name: Upload Pages artifact

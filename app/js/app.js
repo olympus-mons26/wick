@@ -12,6 +12,7 @@
   const themeBtn = document.getElementById("theme-btn");
   const importInput = document.getElementById("import-input");
   const connectFolderBtn = document.getElementById("connect-folder-btn");
+  const browserAlert = document.getElementById("browser-alert");
   const notesToggle = document.getElementById("notes-toggle");
   const shell = document.querySelector(".shell");
   const html = document.documentElement;
@@ -29,6 +30,7 @@
     dirty: false,
     storageAvailable: true,
     folderHandle: null,
+    folderConnected: false,
     folderDatabase: null,
     folderWriteQueue: Promise.resolve(),
     saveTimer: null,
@@ -37,6 +39,10 @@
 
   function setStatus(msg) {
     statusEl.textContent = msg;
+  }
+
+  function supportsFolderAccess() {
+    return window.isSecureContext && typeof window.showDirectoryPicker === "function";
   }
 
   function queueFolderWrite(file) {
@@ -190,14 +196,45 @@
   }
 
   async function writeFolderFile(handle, file) {
-    const target = await handle.getFileHandle(file.name, { create: true });
+    let target;
+    let fileExists = false;
+    try {
+      target = await handle.getFileHandle(file.name);
+      fileExists = true;
+    } catch (error) {
+      if (error.name !== "NotFoundError") throw error;
+      target = await handle.getFileHandle(file.name, { create: true });
+    }
+
+    if (fileExists) {
+      const existing = await target.getFile();
+      if (typeof file.mtime !== "number" || existing.lastModified !== file.mtime) {
+        throw new FolderConflictError(file.name);
+      }
+    }
+
     const writer = await target.createWritable();
     try {
       await writer.write(file.content);
       await writer.close();
     } catch (error) {
-      await writer.abort();
+      try {
+        await writer.abort();
+      } catch {
+        // Preserve the original write or close error.
+      }
       throw error;
+    }
+    file.mtime = (await target.getFile()).lastModified;
+  }
+
+  class FolderConflictError extends Error {
+    constructor(name) {
+      super(
+        'The file "' + name + '" changed outside Wick. Your edits were not written to it. ' +
+        "Reconnect the folder to preserve both versions, or export a backup before closing."
+      );
+      this.name = "FolderConflictError";
     }
   }
 
@@ -214,7 +251,6 @@
     if (olderGuide) {
       olderGuide.content = GUIDE_CONTENT;
       olderGuide.bytes = new Blob([GUIDE_CONTENT]).size;
-      olderGuide.mtime = Date.now();
       await writeFolderFile(handle, olderGuide);
     }
     const diskNames = new Set(diskNotes.map((file) => file.name.toLowerCase()));
@@ -234,8 +270,11 @@
       await writeFolderFile(handle, copy);
     }
     state.folderHandle = handle;
+    state.folderConnected = true;
     state.files = merged;
-    state.current = merged.some((file) => file.name === GUIDE_NAME) ? GUIDE_NAME : activeName;
+    state.current = merged.some((file) => file.name === activeName)
+      ? activeName
+      : merged.some((file) => file.name === GUIDE_NAME) ? GUIDE_NAME : activeName;
     persistNotes();
     refreshFiles();
     if (state.current && state.files.some((file) => file.name === state.current)) {
@@ -249,17 +288,25 @@
       filenameEl.textContent = state.current;
       render();
     }
+    state.dirty = false;
     saveConfig();
     updateFolderLabel(handle);
     setStatus("Connected to " + handle.name + ". Notes auto-save as Markdown files in that folder.");
   }
 
   async function connectFolder() {
-      if (!window.isSecureContext || typeof window.showDirectoryPicker !== "function") {
+      if (!supportsFolderAccess()) {
         throw new Error("Direct folder saving is not available in this browser. Use a current Chromium-based browser, or continue with Import and Export.");
       }
-      if (state.dirty) await saveNow();
-      let handle = state.folderHandle;
+      let handle = state.folderConnected ? null : state.folderHandle;
+      let previousSaveError = null;
+      if (state.dirty) {
+        try {
+          await saveNow();
+        } catch (error) {
+          previousSaveError = error;
+        }
+      }
       if (handle) {
         const permission = await handle.requestPermission({ mode: "readwrite" });
         if (permission !== "granted") handle = null;
@@ -268,17 +315,21 @@
         handle = await window.showDirectoryPicker({ mode: "readwrite" });
       }
       await loadFolder(handle, true);
+      let connectionStatus = "Connected to " + handle.name + ". Notes auto-save as Markdown files in that folder.";
       try {
         await storeFolderHandle(handle);
       } catch (error) {
-        setStatus("Connected to " + handle.name + " for this session, but the browser could not remember it. Reconnect next time. " + error.message);
+        connectionStatus = "Connected to " + handle.name + " for this session, but the browser could not remember it. Reconnect next time. " + error.message;
       }
+      if (previousSaveError) connectionStatus += " Previous save issue: " + previousSaveError.message;
+      setStatus(connectionStatus);
     }
 
   async function restoreFolderConnection() {
-    if (!window.isSecureContext || typeof window.showDirectoryPicker !== "function") {
+    if (!supportsFolderAccess()) {
       connectFolderBtn.disabled = true;
       connectFolderBtn.title = "Direct folder saving is not supported in this browser. Use Import and Export.";
+      browserAlert.hidden = false;
       setStatus("This browser cannot write directly to a folder. Use Import and Export to manage Markdown files.");
       return;
     }
@@ -301,8 +352,17 @@
 
   function safeName(name) {
     const base = String(name || "").replace(/\\/g, "/").split("/").pop().trim();
-    if (!base || base === "." || base === ".." || /[<>:"|?*]/.test(base)) {
-      throw new Error("Invalid note name.");
+    const deviceName = base.split(".")[0].replace(/[ .]+$/g, "");
+    if (
+      !base ||
+      base === "." ||
+      base === ".." ||
+      /[<>:"|?*]/.test(base) ||
+      /[\u0000-\u001f]/.test(base) ||
+      /[. ]$/.test(base) ||
+      /^(?:CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])$/i.test(deviceName)
+    ) {
+      throw new Error("Invalid note name. Choose a Windows-safe filename without a reserved device name.");
     }
     if (/\.[^.]+$/.test(base) && !/\.(md|markdown|txt)$/i.test(base)) {
       throw new Error("Notes must use the .md, .markdown, or .txt extension.");
@@ -357,12 +417,13 @@
     if (!file) throw new Error("The current note no longer exists.");
     file.content = editor.value;
     file.bytes = new Blob([editor.value]).size;
-    file.mtime = Date.now();
+    if (!state.folderHandle) file.mtime = Date.now();
     persistNotes();
     state.dirty = false;
     if (state.folderHandle) {
       try {
         await queueFolderWrite(file);
+        persistNotes();
         setStatus("Saved to " + state.folderHandle.name + "/" + file.name);
         return;
       } catch (error) {
@@ -440,17 +501,26 @@
     const file = state.files.find((item) => item.name === state.current);
     if (!file) throw new Error("The current note no longer exists.");
     const oldName = file.name;
-    file.name = safe;
+    const renamedFile = { ...file, name: safe, mtime: undefined };
+    let removeError = null;
     if (state.folderHandle) {
-      await writeFolderFile(state.folderHandle, file);
-      await state.folderHandle.removeEntry(oldName);
+      await writeFolderFile(state.folderHandle, renamedFile);
+      try {
+        await state.folderHandle.removeEntry(oldName);
+      } catch (error) {
+        removeError = error;
+      }
     }
+    file.name = safe;
+    file.mtime = state.folderHandle ? renamedFile.mtime : Date.now();
     state.current = safe;
     filenameEl.textContent = safe;
     persistNotes();
     refreshFiles();
     saveConfig();
-    setStatus("Renamed to " + safe);
+    setStatus(removeError
+      ? "Renamed to " + safe + ", but could not remove the original " + oldName + ": " + removeError.message
+      : "Renamed to " + safe);
   }
 
   async function deleteFile() {
@@ -734,6 +804,9 @@
     connectFolder().catch((err) => {
       if (err.name !== "AbortError") setStatus(err.message);
     });
+  });
+  document.getElementById("dismiss-browser-alert").addEventListener("click", () => {
+    browserAlert.hidden = true;
   });
   document.getElementById("import-btn").addEventListener("click", () => importInput.click());
   document.getElementById("export-btn").addEventListener("click", () => runAsync(exportCurrent));

@@ -38,7 +38,7 @@ Use **Export** to download just the currently open note as a regular Markdown fi
 
 - **Choose /notes folder:** on first use, select a folder for real Markdown files and grant read/write permission. Wick remembers the folder where supported; it reconnects automatically when permission is still available, or asks you to reconnect.
 - **Hide Notes / Show Notes:** collapse or restore the file list beside the editor to make more room.
-- **New:** create a named Markdown note. With a folder connected, Wick creates its `.md` file and auto-saves edits in the background. `Ctrl+S` / `⌘S` also saves immediately.
+- **New:** create a named Markdown note. Wick rejects filename characters and reserved device names that would break cross-platform saving. With a folder connected, Wick creates its `.md` file and auto-saves edits in the background. `Ctrl+S` / `⌘S` also saves immediately.
 - **Import:** load one or more `.md`, `.markdown`, or `.txt` files, or restore a Wick JSON backup. With a folder connected, imported notes are also written into it. Duplicate names are given a numeric suffix.
 - **Export:** download the open note as a Markdown text file.
 - **Backup:** download every Wick note and theme/current-note settings in one JSON backup.
@@ -92,28 +92,30 @@ Browsers do not permit a page to freely read or write files without permission. 
 
 ## Project website
 
-Open [`docs/index.html`](docs/index.html) locally to view Wick's project website. The site is also static HTML, CSS, and JavaScript and requires no build process.
+Open [`docs/index.html`](docs/index.html) locally to view Wick's project website. The site is also static HTML, CSS, and JavaScript and requires no build process. Its contribution section has separate issue and update actions, and the footer presents distinct credits for the primary and backup hosts.
 
-To publish it with GitHub Pages, push this repository to GitHub, then open **Settings → Pages** and set the source to **GitHub Actions**. The included Pages workflow publishes the site and app together so the website's app and ZIP links work.
+The primary website is [wick.thedev.id](https://wick.thedev.id). The website footer has a separate thank-you for [thedev.id](https://thedev.id), which hosts it, and for [Surge](https://surge.sh), which hosts the [backup at wick.surge.sh](https://wick.surge.sh). Each credit is presented separately with a typographic host wordmark; the site does not load third-party logo images.
 
-The website credits [js.org](https://js.org) for its free website hosting. A `js.org` subdomain must be configured separately with the required DNS record and repository file; this repository does not claim or configure a subdomain.
+To publish this repository's static site with GitHub Pages instead, push the repository to GitHub, then open **Settings → Pages** and set the source to **GitHub Actions**. The included Pages workflow publishes the site and app together so the website's app and ZIP links work.
 
 ## Project links
 
 - Source code: [github.com/olympus-mons26/wick](https://github.com/olympus-mons26/wick)
 - Website author: [olympus_mons26](https://github.com/olympus-mons26)
-- Website hosting: [js.org](https://js.org)
+- Primary website: [wick.thedev.id](https://wick.thedev.id) ([thedev.id](https://thedev.id))
+- Backup website: [wick.surge.sh](https://wick.surge.sh) ([Surge](https://surge.sh))
 
 ## License
 
-Wick's original source code and documentation are licensed under the [MIT License](LICENSE). This license does not cover third-party assets. In particular, `docs/icons8-markdown-96.png` and the derived `favicon.ico` are excluded from the MIT grant and remain subject to their original source's terms. Their exact source and license are not verified in this repository; the files are included in the bundle as-is, but this project grants no additional rights to reuse them. Verify the asset provider's terms and attribution requirements before reuse or redistribution.
+Wick's original source code and documentation are licensed under the Apache License 2.0.
+
+This license does not cover third-party assets. Specifically, `docs/icons8-markdown-96.png` and `favicon.ico` remain subject to the [Icons8 Free Tier License terms](https://icons8.com) and require active attribution links back to their platform.
 
 ## Repository layout
 
 ```text
 .
 ├── .gitignore
-├── LICENSE
 ├── .github/
 │   └── workflows/pages.yml    # Publishes the static site and editor to GitHub Pages
 ├── docs/                  # Project landing page and static assets

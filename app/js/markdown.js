@@ -27,7 +27,7 @@
     s = s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
     s = s.replace(/&lt;u&gt;([\s\S]*?)&lt;\/u&gt;/g, "<u>$1</u>");
     s = s.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (_, alt, url) => {
-      return '<img alt="' + alt + '" src="' + escapeHtml(safeUrl(url)) + '">';
+      return '<img alt="' + escapeHtml(alt) + '" src="' + escapeHtml(safeUrl(url)) + '">';
     });
     s = s.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_, label, url) => {
       return '<a href="' + escapeHtml(safeUrl(url)) + '" target="_blank" rel="noopener noreferrer">' + label + "</a>";
