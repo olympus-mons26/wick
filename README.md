@@ -94,7 +94,7 @@ Browsers do not permit a page to freely read or write files without permission. 
 
 Open [`docs/index.html`](docs/index.html) locally to view Wick's project website. The site is also static HTML, CSS, and JavaScript and requires no build process. Its contribution section has separate issue and update actions, and the footer presents distinct credits for the primary and backup hosts.
 
-The primary website is [wick.thedev.id](https://wick.thedev.id). The website footer has a separate thank-you for [thedev.id](https://thedev.id), which hosts it, and for [Surge](https://surge.sh), which hosts the [backup at wick.surge.sh](https://wick.surge.sh). Each credit is presented separately with a typographic host wordmark; the site does not load third-party logo images.
+The primary website is [wick.surge.sh](https://wick.surge.sh). The website footer has a separate thank-you for [Surge](https://surge.sh), which hosts it, and for [thedev.id](https://thedev.id), which hosts the [backup at wick.thedev.id](https://wick.thedev.id). Each credit is presented separately with a typographic host wordmark; the site does not load third-party logo images.
 
 To publish this repository's static site with GitHub Pages instead, push the repository to GitHub, then open **Settings → Pages** and set the source to **GitHub Actions**. The included Pages workflow publishes the site and app together so the website's app and ZIP links work.
 
@@ -102,8 +102,8 @@ To publish this repository's static site with GitHub Pages instead, push the rep
 
 - Source code: [github.com/olympus-mons26/wick](https://github.com/olympus-mons26/wick)
 - Website author: [olympus_mons26](https://github.com/olympus-mons26)
-- Primary website: [wick.thedev.id](https://wick.thedev.id) ([thedev.id](https://thedev.id))
-- Backup website: [wick.surge.sh](https://wick.surge.sh) ([Surge](https://surge.sh))
+- Primary website: [wick.surge.sh](https://wick.surge.sh) ([Surge](https://surge.sh))
+- Backup website: [wick.thedev.id](https://wick.thedev.id) ([thedev.id](https://thedev.id))
 
 ## License
 
